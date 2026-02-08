@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "clawguard"
+version = "0.1.0"
+description = "Security scanner for OpenClaw AI agent installations"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Vishal M" },
+]
+keywords = ["openclaw", "security", "scanner", "ai-agent", "clawdbot", "moltbot"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "json5>=0.9.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+clawguard = "clawguard.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/vishalmani/clawguard"
+Repository = "https://github.com/vishalmani/clawguard"
+Issues = "https://github.com/vishalmani/clawguard/issues"

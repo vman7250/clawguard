@@ -1,0 +1,41 @@
+{
+  "gateway": {
+    "port": 18789,
+    "bind": "lan",
+    "auth": {
+      "token": "weak"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "sandbox": {
+        "mode": "off"
+      }
+    }
+  },
+  "models": {
+    "providers": {
+      "anthropic": {
+        "apiKey": "sk-ant-api03-FAKEKEYFAKEKEYFAKEKEY1234567890abcdef"
+      },
+      "openai": {
+        "apiKey": "sk-proj-FAKEKEYFAKEKEYFAKEKEY1234567890abcdefghij"
+      }
+    }
+  },
+  "tools": {
+    "exec": {
+      "host": "gateway"
+    }
+  },
+  "channels": {
+    "telegram": {
+      "accounts": [
+        {
+          "id": "bot1",
+          "token": "1234567890:ABCDefghIJKLmnopQRSTuvwxyz123456789"
+        }
+      ]
+    }
+  }
+}

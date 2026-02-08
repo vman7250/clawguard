@@ -1,0 +1,39 @@
+{
+  "gateway": {
+    "port": 18789,
+    "bind": "loopback",
+    "auth": {
+      "token": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+    }
+  },
+  "agents": {
+    "defaults": {
+      "sandbox": {
+        "mode": "all",
+        "scope": "session",
+        "docker": {
+          "network": "none"
+        }
+      }
+    }
+  },
+  "models": {
+    "providers": {
+      "anthropic": {
+        "apiKey": "${ANTHROPIC_API_KEY}"
+      },
+      "openai": {
+        "apiKey": "${OPENAI_API_KEY}"
+      }
+    }
+  },
+  "tools": {
+    "exec": {
+      "host": "sandbox",
+      "security": "allowlist"
+    }
+  },
+  "logging": {
+    "redactSensitive": "tools"
+  }
+}
