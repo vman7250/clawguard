@@ -35,6 +35,6 @@ dependencies = [
 clawguard = "clawguard.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/vishalmani/clawguard"
-Repository = "https://github.com/vishalmani/clawguard"
-Issues = "https://github.com/vishalmani/clawguard/issues"
+Homepage = "https://github.com/vman7250/clawguard"
+Repository = "https://github.com/vman7250/clawguard"
+Issues = "https://github.com/vman7250/clawguard/issues"
