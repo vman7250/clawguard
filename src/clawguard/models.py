@@ -1,57 +1,54 @@
-"""Data models for ClawGuard scan results."""
+"""Dependency-free data models for ClawGuard scan results."""
 
+from dataclasses import dataclass, field
 from enum import Enum
-from pydantic import BaseModel
 
 
 class Severity(str, Enum):
     CRITICAL = "CRITICAL"
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
+    LOW = "LOW"
     INFO = "INFO"
 
 
 SEVERITY_DEDUCTIONS = {
-    Severity.CRITICAL: 20,
-    Severity.HIGH: 10,
-    Severity.MEDIUM: 5,
-    Severity.INFO: 0,
+    Severity.CRITICAL: 20, Severity.HIGH: 10, Severity.MEDIUM: 5,
+    Severity.LOW: 2, Severity.INFO: 0,
 }
 
 
-class Finding(BaseModel):
+@dataclass
+class Finding:
     severity: Severity
     title: str
-    details: list[str] = []
+    id: str = ""
+    details: list[str] = field(default_factory=list)
     fix: str = ""
     category: str = ""
+    key_path: str = ""
+    verbose_details: list[str] = field(default_factory=list)
 
 
-class ScanResult(BaseModel):
-    findings: list[Finding] = []
+@dataclass
+class ScanResult:
+    findings: list[Finding] = field(default_factory=list)
     openclaw_path: str = ""
     openclaw_version: str | None = None
     node_version: str | None = None
+    advisory_snapshot: str = ""
+    tracked_cve_count: int = 543
+    openclaw_audit_findings: list[dict] = field(default_factory=list)
 
     @property
     def score(self) -> int:
-        total = 100
-        for f in self.findings:
-            total -= SEVERITY_DEDUCTIONS[f.severity]
-        return max(0, total)
+        return max(0, 100 - sum(SEVERITY_DEDUCTIONS[f.severity] for f in self.findings))
 
-    @property
-    def critical_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == Severity.CRITICAL)
+    def _count(self, severity: Severity) -> int:
+        return sum(f.severity == severity for f in self.findings)
 
-    @property
-    def high_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == Severity.HIGH)
-
-    @property
-    def medium_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == Severity.MEDIUM)
-
-    @property
-    def info_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == Severity.INFO)
+    critical_count = property(lambda self: self._count(Severity.CRITICAL))
+    high_count = property(lambda self: self._count(Severity.HIGH))
+    medium_count = property(lambda self: self._count(Severity.MEDIUM))
+    low_count = property(lambda self: self._count(Severity.LOW))
+    info_count = property(lambda self: self._count(Severity.INFO))

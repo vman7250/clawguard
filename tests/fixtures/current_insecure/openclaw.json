@@ -1,0 +1,22 @@
+{
+  "gateway": {
+    "bind": "lan",
+    "auth": {"mode": "token", "token": "short"},
+    "controlUi": {"allowedOrigins": ["*"], "dangerouslyAllowHostHeaderOriginFallback": true},
+    "nodes": {"pairing": {"autoApproveCidrs": ["10.0.0.0/8"], "sshVerify": false}, "browser": {"mode": "relay"}}
+  },
+  "browser": {"ssrfPolicy": {"dangerouslyAllowPrivateNetwork": true}},
+  "tools": {
+    "exec": {"security": "full", "ask": "off", "host": "gateway", "strictInlineEval": false, "applyPatch": {"workspaceOnly": false}},
+    "elevated": {"enabled": true}, "fs": {"workspaceOnly": false}, "sessions": {"visibility": "all"}, "deny": []
+  },
+  "agents": {"defaults": {"sandbox": {"mode": "all", "scope": "shared", "workspaceAccess": "rw", "docker": {
+    "network": "bridge", "readOnlyRoot": false, "capDrop": [], "dangerouslyAllowExternalBindSources": true,
+    "dangerouslyAllowReservedContainerTargets": true, "dangerouslyAllowContainerNamespaceJoin": true,
+    "binds": ["/var/run/docker.sock:/var/run/docker.sock", "~/.ssh:/keys"]
+  }}}, "entries": [{"id": "worker", "sandbox": {"mode": "off"}}]},
+  "channels": {"telegram": {"dmPolicy": "open", "allowFrom": ["*", "alice"]}},
+  "session": {"dmScope": "main"},
+  "plugins": {"entries": {"acpx": {"config": {"permissionMode": "approve-all"}}}},
+  "security": {}
+}

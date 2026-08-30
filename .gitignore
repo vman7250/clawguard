@@ -32,3 +32,7 @@ htmlcov/
 # Distribution
 *.tar.gz
 *.whl
+
+# Private docs (server details, credentials, setup notes)
+ORACLE_VM_SETUP.md
+PROJECT_STATUS.md

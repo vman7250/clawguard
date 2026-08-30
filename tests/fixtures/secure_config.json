@@ -32,8 +32,5 @@
       "host": "sandbox",
       "security": "allowlist"
     }
-  },
-  "logging": {
-    "redactSensitive": "tools"
   }
 }

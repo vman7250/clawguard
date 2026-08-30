@@ -39,6 +39,8 @@ def check_permissions(openclaw_path: Path) -> list[Finding]:
     sensitive_files = [
         openclaw_path / "openclaw.json",
         openclaw_path / ".env",
+        openclaw_path / "state" / "openclaw.sqlite",
+        openclaw_path / "secrets.json",
         openclaw_path / "credentials" / "profiles.json",
     ]
 
@@ -47,6 +49,11 @@ def check_permissions(openclaw_path: Path) -> list[Finding]:
     if agents_dir.exists():
         for auth_file in agents_dir.rglob("auth-profiles.json"):
             sensitive_files.append(auth_file)
+        sensitive_files.extend(agents_dir.glob("*/agent/openclaw-agent.sqlite"))
+
+    credentials_dir = openclaw_path / "credentials"
+    if credentials_dir.exists():
+        sensitive_files.extend(path for path in credentials_dir.rglob("*") if path.is_file())
 
     for filepath in sensitive_files:
         if filepath.exists():

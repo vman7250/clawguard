@@ -3,7 +3,10 @@
 import re
 from pathlib import Path
 
-import yaml
+try:
+    import yaml
+except ImportError:  # The core scanner can still run without optional YAML support.
+    yaml = None
 
 from clawguard.models import Finding, Severity
 from clawguard.patterns import (
@@ -25,8 +28,8 @@ def _parse_skill_md(skill_path: Path) -> tuple[dict, str]:
         parts = content.split("---", 2)
         if len(parts) >= 3:
             try:
-                frontmatter = yaml.safe_load(parts[1]) or {}
-            except yaml.YAMLError:
+                frontmatter = yaml.safe_load(parts[1]) or {} if yaml else {}
+            except Exception:
                 pass
             body = parts[2]
 

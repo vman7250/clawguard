@@ -21,6 +21,7 @@ API_KEY_PATTERNS: list[tuple[str, re.Pattern]] = [
     ("Google API key", re.compile(r'AIza[0-9A-Za-z_-]{35}')),
     ("Stripe Secret key", re.compile(r'sk_live_[a-zA-Z0-9]{20,}')),
     ("Generic Bearer token", re.compile(r'Bearer\s+[a-zA-Z0-9_.-]{20,}')),
+    ("Brave Search API key", re.compile(r'BSA[a-zA-Z0-9]{20,}')),
 ]
 
 # Environment variable reference pattern (${VAR_NAME})
@@ -66,6 +67,36 @@ SUSPICIOUS_BINS = [
     "hydra", "john", "hashcat",
     "tcpdump", "wireshark", "tshark",
 ]
+
+# Map LLM provider names to their expected environment variable names
+PROVIDER_ENV_MAP: dict[str, str] = {
+    "anthropic": "ANTHROPIC_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "groq": "GROQ_API_KEY",
+    "xai": "XAI_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+    "google": "GOOGLE_API_KEY",
+    "mistral": "MISTRAL_API_KEY",
+    "deepseek": "DEEPSEEK_API_KEY",
+    "cohere": "COHERE_API_KEY",
+    "together": "TOGETHER_API_KEY",
+}
+
+# Map channel names to their expected environment variable names
+CHANNEL_ENV_MAP: dict[str, str] = {
+    "telegram": "TELEGRAM_BOT_TOKEN",
+    "discord": "DISCORD_BOT_TOKEN",
+    "slack": "SLACK_BOT_TOKEN",
+}
+
+# Free-tier provider limits: { provider: { tpm, rpm, note } }
+PROVIDER_LIMITS: dict[str, dict] = {
+    "groq": {"tpm": 6000, "rpm": 30, "note": "Groq free tier: 6K TPM, 30 RPM"},
+    "openrouter": {"tpm": 100000, "rpm": 8, "note": "OpenRouter free tier: ~8 RPM"},
+}
+
+# Approximate token count for OpenClaw system prompt
+OPENCLAW_SYSTEM_PROMPT_TOKENS = 12600
 
 # Memory poisoning patterns (suspicious instructions in SOUL.md/MEMORY.md)
 MEMORY_POISONING_PATTERNS: list[tuple[str, re.Pattern]] = [

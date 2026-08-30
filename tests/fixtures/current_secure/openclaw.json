@@ -1,0 +1,8 @@
+{
+  "gateway": {"bind": "loopback", "auth": {"mode": "token", "token": "0123456789abcdef0123456789abcdef"}, "controlUi": {"allowedOrigins": ["https://localhost"]}, "nodes": {"pairing": {"sshVerify": true}, "browser": {"mode": "local"}}},
+  "browser": {"ssrfPolicy": {"dangerouslyAllowPrivateNetwork": false}},
+  "tools": {"exec": {"security": "allowlist", "ask": "always", "host": "sandbox", "strictInlineEval": true, "applyPatch": {"workspaceOnly": true}}, "elevated": {"enabled": false}, "fs": {"workspaceOnly": true}, "sessions": {"visibility": "own"}, "deny": ["group:automation", "group:runtime", "group:fs"]},
+  "agents": {"defaults": {"sandbox": {"mode": "all", "scope": "session", "workspaceAccess": "ro", "docker": {"network": "none", "readOnlyRoot": true, "capDrop": ["ALL"], "binds": []}}}},
+  "channels": {"telegram": {"dmPolicy": "pairing", "allowFrom": ["alice"]}}, "session": {"dmScope": "per-peer"},
+  "plugins": {"allow": ["acpx"], "entries": {"acpx": {"config": {"permissionMode": "ask"}}}}, "security": {"installPolicy": "allowlist"}
+}

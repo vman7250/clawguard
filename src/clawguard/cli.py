@@ -1,99 +1,57 @@
-"""ClawGuard CLI - Security scanner for OpenClaw installations."""
+"""ClawGuard command-line interface."""
 
+import argparse
+import sys
 from pathlib import Path
-from typing import Optional
-
-import typer
-from rich.console import Console
 
 from clawguard import __version__
 from clawguard.reporter import print_banner, print_json, print_report
-from clawguard.scanner import CHECK_REGISTRY, detect_openclaw_path, run_fix, run_scan
-
-app = typer.Typer(
-    name="clawguard",
-    help="Security scanner for OpenClaw AI agent installations",
-    add_completion=False,
-)
-console = Console()
+from clawguard.scanner import CHECK_REGISTRY, detect_openclaw_path, run_fix, run_migrate_env, run_scan
 
 
-@app.command()
-def scan(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Path to OpenClaw directory"),
-    format: str = typer.Option("rich", "--format", "-f", help="Output format: rich or json"),
-    check: Optional[list[str]] = typer.Option(None, "--check", "-c", help="Run specific checks only"),
-) -> None:
-    """Scan your OpenClaw installation for security issues."""
-    # Detect or use provided path
-    openclaw_path = path or detect_openclaw_path()
-
-    if not openclaw_path:
-        console.print("[red]Could not find OpenClaw installation.[/red]")
-        console.print("Checked: ~/.openclaw, ~/.clawdbot, ~/.moltbot")
-        console.print("Use --path to specify the directory.")
-        raise typer.Exit(1)
-
-    if not openclaw_path.exists():
-        console.print(f"[red]Path does not exist: {openclaw_path}[/red]")
-        raise typer.Exit(1)
-
-    # Validate check names
-    if check:
-        valid_checks = set(CHECK_REGISTRY.keys())
-        for c in check:
-            if c not in valid_checks:
-                console.print(f"[red]Unknown check: {c}[/red]")
-                console.print(f"Available: {', '.join(sorted(valid_checks))}")
-                raise typer.Exit(1)
-
-    # Run scan
-    result = run_scan(openclaw_path, checks=check)
-
-    # Output
-    if format == "json":
-        print_json(result)
-    else:
-        print_report(result)
-
-    # Exit with non-zero if critical issues found
-    if result.critical_count > 0:
-        raise typer.Exit(2)
-
-
-@app.command()
-def fix(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Path to OpenClaw directory"),
-) -> None:
-    """Auto-fix common security issues in your OpenClaw installation."""
-    openclaw_path = path or detect_openclaw_path()
-
-    if not openclaw_path:
-        console.print("[red]Could not find OpenClaw installation.[/red]")
-        raise typer.Exit(1)
-
-    print_banner()
-    console.print(f"\nFixing security issues in [bold]{openclaw_path}[/bold] ...\n")
-
-    actions = run_fix(openclaw_path)
-
-    if actions:
-        for action in actions:
-            console.print(f"  [green]FIXED[/green]  {action}")
-        console.print(f"\n[green]{len(actions)} issue(s) fixed.[/green]")
-        console.print("Run [bold]clawguard scan[/bold] to verify.\n")
-    else:
-        console.print("[green]No auto-fixable issues found.[/green]\n")
-
-
-@app.command()
-def version() -> None:
-    """Show ClawGuard version."""
-    console.print(f"ClawGuard v{__version__}")
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="clawguard", description="Security scanner for OpenClaw AI agent installations")
+    parser.add_argument("--version", action="version", version=f"ClawGuard v{__version__}")
+    commands = parser.add_subparsers(dest="command", required=True)
+    scan = commands.add_parser("scan")
+    scan.add_argument("--path", "-p", type=Path)
+    scan.add_argument("--format", "-f", default="rich", choices=["rich", "json"])
+    scan.add_argument("--json", action="store_true")
+    scan.add_argument("--check", "-c", action="append")
+    scan.add_argument("--verbose", "-v", action="store_true")
+    scan.add_argument("--refresh-advisories", action="store_true")
+    scan.add_argument("--with-openclaw-audit", action="store_true")
+    fix = commands.add_parser("fix"); fix.add_argument("--path", "-p", type=Path)
+    migrate = commands.add_parser("migrate-env"); migrate.add_argument("--path", "-p", type=Path); migrate.add_argument("--dry-run", action="store_true")
+    commands.add_parser("version")
+    return parser
 
 
 def main() -> None:
-    app()
+    args = build_parser().parse_args()
+    if args.command == "version":
+        print(f"ClawGuard v{__version__}"); return
+    openclaw_path = args.path or detect_openclaw_path()
+    if not openclaw_path or not openclaw_path.exists():
+        print("Could not find OpenClaw installation. Use --path to specify it.", file=sys.stderr); raise SystemExit(1)
+    if args.command == "scan":
+        invalid = set(args.check or []) - set(CHECK_REGISTRY)
+        if invalid:
+            print(f"Unknown check: {', '.join(sorted(invalid))}", file=sys.stderr); raise SystemExit(1)
+        result = run_scan(openclaw_path, args.check, args.refresh_advisories, args.with_openclaw_audit)
+        print_json(result) if args.json or args.format == "json" else print_report(result, args.verbose)
+        if result.critical_count:
+            raise SystemExit(2)
+    elif args.command == "fix":
+        print_banner()
+        actions = run_fix(openclaw_path)
+        for action in actions:
+            print(f"FIXED  {action}")
+        if not actions:
+            print("No auto-fixable issues found.")
+    else:
+        result = run_migrate_env(openclaw_path, args.dry_run)
+        print(result)
 
 
 if __name__ == "__main__":
